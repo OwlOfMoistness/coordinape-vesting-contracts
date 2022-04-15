@@ -8,6 +8,7 @@ import "../../interfaces/IVesting.sol";
 contract Vesting is Ownable, IVesting {
 
 	struct Vehicule {
+		bool 	updateable;
 		uint256 start;
 		uint256 end;
 		uint256 upfront;
@@ -37,22 +38,24 @@ contract Vesting is Ownable, IVesting {
 		return a > b ? a : b;
 	}
 
-	function createVehicule(address _user, uint256 _amount, uint256 _upfront, uint256 _start, uint256 _end) external onlyOwner returns(uint256){
+	function createVehicule(address _user, uint256 _amount, uint256 _upfront, uint256 _start, uint256 _end, bool _updateable) external onlyOwner returns(uint256){
 		require(_end > _start, "Vesting: wrong vehicule parametres");
 		require(_start > 0, "Vesting: start cannot be 0");
 
 		uint256 counter = vehiculeCount[_user];
-		vehicules[_user][counter] = Vehicule(_start, _end, _upfront, _amount, 0, 0);
+		vehicules[_user][counter] = Vehicule(_updateable, _start, _end, _upfront, _amount, 0, 0);
 		vehiculeCount[_user]++;
 		emit VehiculeCreated(_user, counter, _amount + _upfront, _start, _end);
 	}
 
 	function killVehicule(address _user, uint256 _index) external onlyOwner {
+		require(vehicules[_user][_index].updateable, "Vesting: Can't kill");
 		delete vehicules[_user][_index];
 	}
 
 	function endVehicule(address _user, uint256 _index) external onlyOwner {
 		Vehicule storage vehicule = vehicules[_user][_index];
+		require(vehicule.updateable, "Vesting: Can't end");
 		uint256 _now = block.timestamp;
 		uint256 start = vehicule.start;
 		if (start == 0)
