@@ -4,6 +4,7 @@ interface IVesting {
 	function co() external view returns(address);
 
 	function vehicules(address _user, uint256 _index) external view returns (
+		bool 	updateable,
 		uint256 start,
 		uint256 end,
 		uint256 upfront,

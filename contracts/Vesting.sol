@@ -25,7 +25,7 @@ contract Vesting is Ownable, IVesting {
 	event YieldClaimed(address indexed user, uint256 amount);
 	event VehiculeCreated(address indexed user, uint256 id, uint256 amount, uint256 start, uint256 end);
 
-	constructor(address _co) public {
+	constructor(address _co) {
 		require(_co != address(0));
 		co = _co;
 	}
@@ -55,7 +55,7 @@ contract Vesting is Ownable, IVesting {
 
 	function endVehicule(address _user, uint256 _index) external onlyOwner {
 		Vehicule storage vehicule = vehicules[_user][_index];
-		require(vehicule.updateable, "Vesting: Can't end");
+		require(vehicule.updateable, "Vesting: Cannot end");
 		uint256 _now = block.timestamp;
 		uint256 start = vehicule.start;
 		if (start == 0)
