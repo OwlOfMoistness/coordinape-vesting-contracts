@@ -3,7 +3,7 @@ pragma solidity ^0.8.2;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import "../../interfaces/IVesting.sol";
+import "../interfaces/IVesting.sol";
 
 contract Vesting is Ownable, IVesting {
 
@@ -22,7 +22,7 @@ contract Vesting is Ownable, IVesting {
 	mapping(address => mapping(uint256 => Vehicule)) public override vehicules;
 	mapping(address => uint256) public override vehiculeCount;
 
-	event YieldClaimed(address indexed user, uint256 amount);
+	event TokensClaimed(address indexed user, uint256 amount);
 	event VehiculeCreated(address indexed user, uint256 id, uint256 amount, uint256 start, uint256 end);
 
 	constructor(address _co) {
@@ -95,7 +95,7 @@ contract Vesting is Ownable, IVesting {
 		uint256 yield = (vehicule.amount * elapsed / maxDelta) - vehicule.claimed;
 		vehicule.claimed += yield;
 		IERC20(co).transfer(msg.sender, yield + upfront);
-		emit YieldClaimed(msg.sender, yield);
+		emit TokensClaimed(msg.sender, yield);
 	}
 
 	function _claimUpfront(Vehicule storage vehicule) private returns(uint256) {
@@ -109,10 +109,10 @@ contract Vesting is Ownable, IVesting {
 	}
 
 	function balanceOf(address _user) external view returns(uint256 totalVested) {
-		uint256 vehiculeCount = vehiculeCount[msg.sender];
+		uint256 vehiculeCount = vehiculeCount[_user];
 		for (uint256 i = 0; i < vehiculeCount; i++) {
-			Vehicule memory vehicule = vehicules[msg.sender][i];
-			totalVested = totalVested + pendingReward(msg.sender, i);
+			Vehicule memory vehicule = vehicules[_user][i];
+			totalVested += totalVested + pendingReward(_user, i);
 		}
 	}
 
